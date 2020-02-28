@@ -1,20 +1,23 @@
-import React, {useState, useEffect} from 'react';
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
-import statusReal from "./status.real"
-const reader = new FileReader();
 
 function PackageInformation(props) {
 
   return (
         <div>
-          <div>{props.selectedPackage.package}</div>
-          <a>{props.selectedPackage.description}</a>
-          <div>Depends:</div>
+          <div className="package-header">{props.selectedPackage.package}</div>
+          <div>{props.selectedPackage.description}</div>
+          <div className="sub-header">Depends:</div>
           {props.selectedPackage.depends.map(item =>
             item === "Nothing"
               ? <div>Nothing</div>
-              : <button onClick={() => props.onSelectPackage(item)}>{item}</button>
+              : <button key={item} onClick={() => props.onSelectPackage(item)}>{item}</button>
+          )}
+          <div className="sub-header">Reverse Dependencies:</div>
+          {props.selectedPackage.reverse_dependencies.map(item =>
+            item === "Nothing"
+              ? <div>Nothing</div>
+              : <button key={item} onClick={() => props.onSelectPackage(item)}>{item}</button>
           )}
         </div>
   );

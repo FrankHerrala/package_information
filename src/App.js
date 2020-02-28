@@ -1,10 +1,8 @@
-import React, {useState, useEffect} from 'react';
-import logo from './logo.svg';
+import React, {useState} from 'react';
 import './App.css';
 import statusReal from "./status.real"
 import PackageTable from "./PackageTable"
 import PackageInformation from "./PackageInformation"
-const reader = new FileReader();
 
 function App() {
   const [isPackageSelected, setSelection] = useState(null);
@@ -12,7 +10,6 @@ function App() {
   const [packages, setPackages] = useState([]);
 
   function onSelectPackage(packageData){
-    console.log("jahuu")
     if (typeof packageData === "string"){
       setSelection(packages.find(selection => selection.package === packageData))
     }else{
@@ -23,15 +20,16 @@ function App() {
   async function getPackages(){
     let response = await fetch(statusReal);
     let text = await response.text();
-    var packageBlob = new Blob([text])
-    var allPackages = []
+    let packageBlob = new Blob([text])
+    let allPackages = []
     packageBlob.text().then( text => {
-      var contents = text;
-      var packagesArray = contents.split(/\s\n/)
+      let contents = text;
+      let packagesArray = contents.split(/\s\n/)
       packagesArray.map( item => {
-        var packageInfo = {package: "",
+        let packageInfo = {package: "",
                                   description: "",
-                                  depends: []}
+                                  depends: [],
+                                  reverse_dependencies: []}
         packageInfo.package = item.slice(item.search("Package: ")+9, item.search(/\n/));
         packageInfo.description = item.slice(item.search("Description: ")+13,item.search("Original-Maintainer:"))
         var depends = item.match(/(?<=\nDepends:).*\n/);
@@ -40,9 +38,10 @@ function App() {
           packageInfo.depends = ["Nothing"];
         }else{
           depends = depends[0]
-          var dependantPackages = depends.match(/(?<=\s)[^\(\),\s]*(?=[\s,\,])/)
-          packageInfo.depends = dependantPackages;
-
+          let dependantPackages = depends.match(/(?<=\s)[^(),\s]*(?=[\s,\,])/g)
+          dependantPackages.map( dependant => {
+            packageInfo.depends.push(dependant)
+          })
         }
         allPackages.push(packageInfo);
 
@@ -56,6 +55,16 @@ function App() {
           return 0;
         }
       });
+      allPackages.map( item => {
+        let reverse_dependencies = allPackages.filter(data => data.depends.find(dependant => item.package === dependant))
+        if (reverse_dependencies.length === 0){
+          item.reverse_dependencies.push("Nothing")
+        }else{
+          reverse_dependencies.map(element => {
+            item.reverse_dependencies.push(element.package);
+          })
+        }
+      })
       setPackages(allPackages)
     })
   }

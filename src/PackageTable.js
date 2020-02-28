@@ -1,8 +1,5 @@
-import React, {useState, useEffect} from 'react';
-import logo from './logo.svg';
+import React from 'react';
 import './App.css';
-import statusReal from "./status.real"
-const reader = new FileReader();
 
 function PackageTable(props) {
 
@@ -17,7 +14,7 @@ function PackageTable(props) {
             </span>
           </div>
           {props.packages.map( (item, i) =>
-            <div key={item.Package} className="table-row">
+            <div key={item.package} className="table-row">
               <span style={{width: "10%"}}>{i+1}.</span>
               <button style={{width: "90%"}} onClick={() => props.onSelectPackage(item)}>{item.package}</button>
             </div>
